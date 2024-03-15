@@ -70,8 +70,7 @@ public class SockServer {
                   os.writeObject(receivedInt + " and " + receviedString + " ... Got it!");
                 }
             }
-        }  
-        System.out.println("Server Closed...");
+        }
       } catch(Exception e) {
         e.printStackTrace();
         
