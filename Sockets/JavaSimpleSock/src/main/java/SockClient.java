@@ -23,12 +23,24 @@ class SockClient {
 
     try {
       // open the connection
-      sock = new Socket(host, 3333); // connect to host and socket on port 8888
+      sock = new Socket(host, 8888); // connect to host and socket on port 8888
       // get output channel
       OutputStream out = sock.getOutputStream();
       // create an object output writer (Java only)
       ObjectOutputStream os = new ObjectOutputStream(out);
       ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+
+      if(args.length >= 1) {
+        host = args[0];
+      }
+
+      if(args.length >= 2) {
+        message = args[1];
+      }
+
+      if(args.length >= 3) {
+        number = Integer.valueOf(args[2]);
+      }
 
       while (true) {
         System.out.print("Please enter a String to send to the Server (enter \"exit\" to quit\"): ");
@@ -64,7 +76,7 @@ class SockClient {
       in.close();
       sock.close();
     } catch(ConnectException e){
-      System.out.println("Connection Error");
+      System.out.println("Connection Error" + e);
     }catch (Exception e) {
       e.printStackTrace();
     }
