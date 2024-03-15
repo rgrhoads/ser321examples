@@ -21,10 +21,11 @@ public class SockServer {
     ObjectOutputStream os = null;
     String receviedString = "";
     Integer receivedInt = 0;
+    String port = 8888;
     try {
         //open socket
-        ServerSocket serv = new ServerSocket(8888); // create server socket on port 8888
-        System.out.println("Server ready for a connection");
+        ServerSocket serv = new ServerSocket(port); // create server socket on port 8888
+        System.out.println("Server ready for a connection on Port: " + port);
         
         //loop infinitely to get a connection and exchange messages
         while(true){
@@ -70,6 +71,7 @@ public class SockServer {
                 }
             }
         }  
+        System.out.println("Server Closed...");
       } catch(Exception e) {
         e.printStackTrace();
         
