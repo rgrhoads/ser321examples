@@ -21,7 +21,7 @@ public class SockServer {
     ObjectOutputStream os = null;
     String receviedString = "";
     Integer receivedInt = 0;
-    String port = 8888;
+    int port = 8888;
     try {
         //open socket
         ServerSocket serv = new ServerSocket(port); // create server socket on port 8888
