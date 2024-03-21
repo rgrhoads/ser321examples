@@ -1,3 +1,4 @@
+import io.github.pixee.security.ObjectInputFilters;
 import java.io.File;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
@@ -37,6 +38,7 @@ public class UserFileSerialize {
            File inFile = new File("user.ser");
            ObjectInputStream in =
               new ObjectInputStream(new FileInputStream(inFile));
+           ObjectInputFilters.enableObjectFilterIfUnprotected(in);
            User aUser = (User)in.readObject();
            System.out.println("User de-serialize from file is: "+aUser.toString());
            in.close();

@@ -1,3 +1,4 @@
+import io.github.pixee.security.ObjectInputFilters;
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -31,6 +32,7 @@ class ThreadedSockClient {
       // declare the object streams using the raw socket
       ObjectOutputStream os = new ObjectOutputStream(sock.getOutputStream());
       ObjectInputStream is = new ObjectInputStream(sock.getInputStream());
+      ObjectInputFilters.enableObjectFilterIfUnprotected(is);
 
       // take input from the user
       System.out.print("Line number to get [0-4, empty to exit]>");

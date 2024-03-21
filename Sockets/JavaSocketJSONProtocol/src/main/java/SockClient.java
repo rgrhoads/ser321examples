@@ -1,3 +1,4 @@
+import io.github.pixee.security.ObjectInputFilters;
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
@@ -31,6 +32,7 @@ class SockClient {
       // create an object output writer (Java only)
       ObjectOutputStream os = new ObjectOutputStream(out);
       ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+      ObjectInputFilters.enableObjectFilterIfUnprotected(in);
 
       loopy: while (true) {
         System.out.println(" 1 - for sending String\n 2 - for sending number\n 0 - to quit");

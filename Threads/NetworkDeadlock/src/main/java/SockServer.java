@@ -1,3 +1,4 @@
+import io.github.pixee.security.ObjectInputFilters;
 import java.net.*;
 import java.io.*;
 
@@ -10,6 +11,7 @@ class SockServer {
         Socket sock = serv.accept();
 
         ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+        ObjectInputFilters.enableObjectFilterIfUnprotected(in);
         ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
 
         String s = (String) in.readObject();

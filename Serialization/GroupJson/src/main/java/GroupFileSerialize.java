@@ -1,3 +1,4 @@
+import io.github.pixee.security.ObjectInputFilters;
 import java.io.PrintWriter;
 import java.io.File;
 import java.io.ObjectOutputStream;
@@ -52,6 +53,7 @@ public class GroupFileSerialize {
       File inFile = new File("admin.ser");
       ObjectInputStream in =
                             new ObjectInputStream(new FileInputStream(inFile));
+      ObjectInputFilters.enableObjectFilterIfUnprotected(in);
       Group groupAgain = (Group)in.readObject();
       System.out.println("Done importing the group from admin.ser as:");
       groupAgain.printGroup();

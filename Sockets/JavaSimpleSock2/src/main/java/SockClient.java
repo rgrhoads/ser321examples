@@ -1,3 +1,4 @@
+import io.github.pixee.security.ObjectInputFilters;
 import java.net.*;
 import java.io.*;
 
@@ -45,6 +46,7 @@ class SockClient {
       os.flush();
 
       ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+      ObjectInputFilters.enableObjectFilterIfUnprotected(in);
       String i = (String) in.readObject();
       System.out.println(i);
       sock.close(); // close socked after sending

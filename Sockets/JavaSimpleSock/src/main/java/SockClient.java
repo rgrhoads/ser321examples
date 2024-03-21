@@ -1,3 +1,4 @@
+import io.github.pixee.security.ObjectInputFilters;
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
@@ -29,6 +30,7 @@ class SockClient {
       // create an object output writer (Java only)
       ObjectOutputStream os = new ObjectOutputStream(out);
       ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+      ObjectInputFilters.enableObjectFilterIfUnprotected(in);
 
       if(args.length >= 1) {
         host = args[0];

@@ -1,3 +1,4 @@
+import io.github.pixee.security.ObjectInputFilters;
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -33,6 +34,7 @@ public class ThreadedSockServer extends Thread {
     try {
       // setup read/write channels for connection
       ObjectInputStream in = new ObjectInputStream(conn.getInputStream());
+      ObjectInputFilters.enableObjectFilterIfUnprotected(in);
       ObjectOutputStream out = new ObjectOutputStream(conn.getOutputStream());
 
       // read the digit being send

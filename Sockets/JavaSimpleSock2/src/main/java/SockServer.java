@@ -1,3 +1,4 @@
+import io.github.pixee.security.ObjectInputFilters;
 import java.net.*;
 import java.io.*;
 
@@ -25,7 +26,8 @@ public class SockServer {
         sock = serv.accept(); // blocking wait
         // setup the object reading channel
         ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
-        
+        ObjectInputFilters.enableObjectFilterIfUnprotected(in);
+
         // read in one object, the message. we know a string was written only by knowing what the client sent. 
         // must cast the object from Object to desired type to be useful
         String s = (String) in.readObject();

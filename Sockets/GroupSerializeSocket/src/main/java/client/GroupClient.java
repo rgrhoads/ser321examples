@@ -1,5 +1,6 @@
 package client;
 
+import io.github.pixee.security.ObjectInputFilters;
 import java.net.*;
 import java.io.*;
 import java.util.StringTokenizer;
@@ -135,6 +136,7 @@ public class GroupClient extends Object {
          File inFile = new File("admin2.ser");
          ObjectInputStream in =
             new ObjectInputStream(new FileInputStream(inFile));
+         ObjectInputFilters.enableObjectFilterIfUnprotected(in);
          Group g = (GroupImpl)in.readObject();
          System.out.println("Group "+g.getName()+" deserialized. Includes:");
          Vector<String> users = g.getUserNames();

@@ -1,5 +1,6 @@
 package serial;
 
+import io.github.pixee.security.ObjectInputFilters;
 import java.io.File;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
@@ -42,6 +43,7 @@ public class GroupFileSerialize {
       File inFile = new File("admin.ser");
       ObjectInputStream in =
                             new ObjectInputStream(new FileInputStream(inFile));
+      ObjectInputFilters.enableObjectFilterIfUnprotected(in);
       Group g = (GroupImpl)in.readObject();
       System.out.println("Group "+g.getName()+" deserialized. Includes:");
       Vector<String> users = g.getUserNames();
