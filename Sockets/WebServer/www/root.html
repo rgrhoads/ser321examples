@@ -6,8 +6,43 @@
 		<h3>You can make the following GET requests<h3>
 		<ul>
 			<li>/file/sample.html -- returns the content of the file sample.html</li>
-			<li>/json -- returns a json of the /random request</a></li>
-			<li>/random -- returns index.html</a></li>
+			<br>
+			<li>/json -- returns a json of the /random request</li>
+			<br>
+			<li>/random -- returns index.html</li>
+			<br>
+			<li>/multiply -- returns product of num1 and num2</li>
+			<br>
+			<li> /github -- returns JSON array of github repositories
+				<ul>e.g. /github?query=users/rgrhoads/repos</ul>
+			</li>
+			<br>
+			<li> /free-games -- returns JSON array of free games and content
+				<ul>e.g. /free-games?platform=steam&type=game</ul>
+				<br>
+				<ul>accepted platforms: 
+					<ul>pc, steam, epic-games-store, ubisoft, gog, itchio, ps4, ps5, xbox-one, xbox-series-xs, switch, android, ios, vr, battlenet, origin, drm-free, xbox-360</ul>
+				</ul>
+				<br>
+				<ul>accepted types:
+					<ul> game, loot, beta</ul>
+				</ul>
+				<br>
+			</li>
+			<li> /remote-jobs -- returns JSON array of open remote jobs
+				<ul>e.g. /remote-jobs?count=5&geo=usa&industy=engineering</ul>
+				<br>
+				<ul>accepted geos: 
+					<ul>apac, emea, latam, argentina, australia, austria, belgium, brazil, bulgaria, canada, china, costa-rica, croatia, cyprus, czechia, denmark, estonia, europe</ul>
+					<ul>finland, france, germany, greece, hungary, ireland, israel, italy, japan, latvia, lithuania, mexico, netherlands, new-zealand, norway, philippines, poland</ul>
+					<ul>portugal, romania, singapore, slovakia, slovenia, south-korea, spain, sweden, switzerland, thailand, turkiye, uk, united-arab-emirates, usa, vietnam</ul>
+				</ul>
+				<br>
+				<ul>accepted industries: 
+					<ul>business, copywriting, supporting, data-science, design-multimedia, admin, accounting-finance</ul>
+					<ul>hr, marketing, management, dev, seller, seo, smm, engineering, technical-support, web-app-design</ul>
+				</ul>
+			</li>
 		</ul>
 		<h3>File Structure in www (you can use /file/www/FILENAME):</h3>
 		${links}

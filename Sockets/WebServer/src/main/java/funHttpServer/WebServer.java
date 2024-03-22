@@ -26,6 +26,10 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.nio.charset.Charset;
 
+import org.json.*;
+
+import netscape.javascript.JSObject;
+
 class WebServer {
   public static void main(String args[]) {
     WebServer server = new WebServer(8888);
@@ -194,28 +198,39 @@ class WebServer {
             builder.append("File not found: " + file);
           }
         } else if (request.contains("multiply?")) {
-          // This multiplies two numbers, there is NO error handling, so when
-          // wrong data is given this just crashes
+          // This multiplies two numbers
 
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-          // extract path parameters
-          query_pairs = splitQuery(request.replace("multiply?", ""));
+          Integer result = null;
 
-          // extract required fields from parameters
-          Integer num1 = Integer.parseInt(query_pairs.get("num1"));
-          Integer num2 = Integer.parseInt(query_pairs.get("num2"));
+          try {
+            // extract path parameters
+            query_pairs = splitQuery(request.replace("multiply?", ""));
 
-          // do math
-          Integer result = num1 * num2;
+            // extract required fields from parameters
+            Integer num1 = Integer.parseInt(query_pairs.get("num1"));
+            Integer num2 = Integer.parseInt(query_pairs.get("num2"));
+
+            // do math
+            result = num1 * num2;
+
+          } catch(Exception e) {
+            System.out.println("Error: " + e);
+            e.printStackTrace();
+          }
 
           // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Result is: " + result);
-
-          // TODO: Include error handling here with a correct error code and
-          // a response that makes sense
+          if (result != null) { //success
+            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Result is: " + result);
+          } else { // failure
+            builder.append("HTTP/1.1 400 Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Missing or incorrect query parameters...");
+          }
 
         } else if (request.contains("github?")) {
           // pulls the query from the request and runs it with GitHub's REST API
@@ -227,20 +242,242 @@ class WebServer {
           //     "/repos/OWNERNAME/REPONAME/contributors"
 
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-          query_pairs = splitQuery(request.replace("github?", ""));
-          String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
-          System.out.println(json);
+          JSONArray repos = new JSONArray();
+          JSONArray res = null;
+          String errMsg = "";
+          
+          try {
+            query_pairs = splitQuery(request.replace("github?", ""));
+            String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
+            res = new JSONArray(json);
+          } catch (Exception e) { // Error retrieving data from GitHub API
+            errMsg = "There was an issue retrieving data from GitHub API";
+            e.printStackTrace();
+          }
 
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Check the todos mentioned in the Java source file");
-          // TODO: Parse the JSON returned by your fetch and create an appropriate
-          // response based on what the assignment document asks for
+          if (res != null) {
+            try {
+              // Iterate over JSON Array containing GitHub repository data.
+              for(int i = 0; i < res.length(); i++) {
+                JSONObject temp = new JSONObject(res.get(i).toString());
+                JSONObject repo = new JSONObject();
+  
+                // Get Repository ID number
+                int id = temp.getInt("id");
+  
+                // Get Repository Name
+                String fullName = temp.getString("full_name");
+                int idx = fullName.indexOf("/");
+                String repoName = fullName.substring(idx + 1);
+  
+                // Get Repository Owner and Login
+                JSONObject owner = temp.getJSONObject("owner");
+                String login = owner.getString("login");
+                
+                // Add ID, Repo Name, and Owner Login to repository JSON Object
+                repo.put("ID", id);
+                repo.put("RepoName", repoName);
+                repo.put("OwnerLogin", login);
+  
+                // Add Repository JSON object to repositories JSON Array
+                repos.put(repo);
+              }
+            } catch(Exception e) { // Error parsing data
+              errMsg = "There was an issue while parsing data";
+              e.printStackTrace();
+            }
+          }
 
-        } else {
-          // if the request is not recognized at all
+          if (repos.length() > 0) { // Success! 
+            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append(repos.toString());
+          } else { // There was an internal server error
+            builder.append("HTTP/1.1 500 Internal Server Error\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append(errMsg);
+          }
 
+        } else if (request.contains("free-games?")) {
+          Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+          
+          JSONArray games = new JSONArray();
+          JSONArray res = null;
+          
+          String url = "https://www.gamerpower.com/api/giveaways?";
+          String platform = "";
+          String type = "";
+
+          String errMsg = "";
+          
+          // Parse query parameters
+          try {
+            query_pairs = splitQuery(request.replace("free-games?", ""));
+          } catch (Exception e) { // Error parsing query parameters
+            errMsg = "There was an issue parsing query parameters";
+            e.printStackTrace();
+          }
+
+          // Add query parameter platform to URL
+          if (query_pairs.get("platform") != null) {
+            platform = query_pairs.get("platform").toLowerCase();
+            url += "platform=" + platform + "&";
+          }
+
+          // Add query parameter type to URL
+          if (query_pairs.get("type") != null) {
+            type = query_pairs.get("type").toLowerCase();
+            url += "type=" + type;
+          }
+          
+          // Submit request for game data
+          try {
+            String json = fetchURL(url);
+            // System.out.println("Response: " + json);
+            res = new JSONArray(json);
+          } catch (Exception e) { // Error retrieving data from free games API
+            errMsg = "There was an issue retrieving game data";
+            e.printStackTrace();
+          }
+
+          // Parse response data
+          if (res != null) {
+            try {
+              // Iterate over JSON Array containing game data.
+              for(int i = 0; i < res.length(); i++) {
+                JSONObject temp = new JSONObject(res.get(i).toString());
+                JSONObject game = new JSONObject();
+  
+                // Get game details
+                int id = temp.getInt("id");
+                String title = temp.getString("title");
+                String desc = temp.getString("description");
+                String gameUrl = temp.getString("gamerpower_url");
+                
+                // Add details to game JSON Object
+                game.put("ID", id);
+                game.put("Title", title);
+                game.put("Description", desc);
+                game.put("URL", gameUrl);
+  
+                // Add game JSON object to games JSON Array
+                games.put(game);
+              }
+            } catch(Exception e) { // Error parsing data
+              errMsg = "There was an issue while parsing data";
+              e.printStackTrace();
+            }
+          }
+
+          if (games.length() > 0) { // Success! 
+            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+              builder.append(games.toString());
+          } else { // There was an internal server error
+            builder.append("HTTP/1.1 500 Internal Server Error\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append(errMsg);
+          }
+
+        } else if (request.contains("remote-jobs?")) {
+          Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+          
+          JSONArray jobs = new JSONArray();
+          JSONArray res = null;
+          
+          String url = "https://jobicy.com/api/v2/remote-jobs?";
+          String count = "5";
+          String geo = "";
+          String industry = "";
+
+          String errMsg = "";
+          
+          // Parse query parameters
+          try {
+            query_pairs = splitQuery(request.replace("remote-jobs?", ""));
+          } catch (Exception e) { // Error parsing query parameters
+            errMsg = "There was an issue parsing query parameters";
+            e.printStackTrace();
+          }
+
+          // Add query parameter count to URL
+          if (query_pairs.get("count") != null) {
+            count = query_pairs.get("count");
+          }
+          //default count is 5
+          url += "count=" + count + "&";
+
+          // Add query parameter geo to URL
+          if (query_pairs.get("geo") != null) {
+            geo = query_pairs.get("geo").toLowerCase();
+            url += "geo=" + geo + "&";
+          }
+
+          // Add query parameter industry to URL
+          if (query_pairs.get("industry") != null) {
+            industry = query_pairs.get("industry").toLowerCase();
+            url += "industry=" + industry;
+          }
+          
+          // Submit request for remote jobs data
+          try {
+            String json = fetchURL(url);
+            JSONObject responseData = new JSONObject(json);
+            res = responseData.getJSONArray("jobs");
+          } catch (Exception e) { // Error retrieving data from remote jobs API
+            errMsg = "There was an issue retrieving remote jobs data";
+            e.printStackTrace();
+          }
+
+          // Parse response data
+          if (res != null) {
+            try {
+              // Iterate over JSON Array containing job data.
+              for(int i = 0; i < res.length(); i++) {
+                JSONObject temp = new JSONObject(res.get(i).toString());
+                JSONObject job = new JSONObject();
+  
+                // Get job details
+                int id = temp.getInt("id");
+                String jobTitle = temp.getString("jobTitle");
+                String companyName = temp.getString("companyName");
+                // String desc = temp.getString("jobDescription");
+                String jobUrl = temp.getString("url");
+                
+                // Add details to job JSON Object
+                job.put("ID", id);
+                job.put("Title", jobTitle);
+                job.put("Company", companyName);
+                // job.put("Description", desc);
+                job.put("URL", jobUrl);
+  
+                // Add job JSON object to jobs JSON Array
+                jobs.put(job);
+              }
+            } catch(Exception e) { // Error parsing data
+              errMsg = "There was an issue while parsing data";
+              e.printStackTrace();
+            }
+          }
+
+          if (jobs.length() > 0) { // Success! 
+            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            // System.out.println(jobs.toString());
+            builder.append(jobs.toString());
+          } else { // There was an internal server error
+            builder.append("HTTP/1.1 500 Internal Server Error\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append(errMsg);
+          }
+          
+        } else { // If the request is not recognized at all
           builder.append("HTTP/1.1 400 Bad Request\n");
           builder.append("Content-Type: text/html; charset=utf-8\n");
           builder.append("\n");
