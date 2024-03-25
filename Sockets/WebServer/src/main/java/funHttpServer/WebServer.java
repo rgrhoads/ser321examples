@@ -245,7 +245,7 @@ class WebServer {
           JSONArray repos = new JSONArray();
           JSONArray res = null;
           String errMsg = "";
-          String errCode = 200;
+          int errCode = 200;
           
           try {
             query_pairs = splitQuery(request.replace("github?", ""));
