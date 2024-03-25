@@ -245,12 +245,14 @@ class WebServer {
           JSONArray repos = new JSONArray();
           JSONArray res = null;
           String errMsg = "";
+          String errCode = 200;
           
           try {
             query_pairs = splitQuery(request.replace("github?", ""));
             String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
             res = new JSONArray(json);
           } catch (Exception e) { // Error retrieving data from GitHub API
+            errCode = 400;
             errMsg = "There was an issue retrieving data from GitHub API";
             e.printStackTrace();
           }
@@ -283,18 +285,25 @@ class WebServer {
                 repos.put(repo);
               }
             } catch(Exception e) { // Error parsing data
+              errCode = 500;
               errMsg = "There was an issue while parsing data";
               e.printStackTrace();
             }
           }
 
           if (repos.length() > 0) { // Success! 
-            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("HTTP/1.1 " + errCode + " OK\n");
             builder.append("Content-Type: text/html; charset=utf-8\n");
             builder.append("\n");
             builder.append(repos.toString());
+          } else if (errCode == 400) { // There was an internal server error
+            builder.append("HTTP/1.1 " + errCode + " Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append(errMsg);
+
           } else { // There was an internal server error
-            builder.append("HTTP/1.1 500 Internal Server Error\n");
+            builder.append("HTTP/1.1 " + errCode + " Internal Server Error\n");
             builder.append("Content-Type: text/html; charset=utf-8\n");
             builder.append("\n");
             builder.append(errMsg);
